@@ -1,7 +1,7 @@
 import { aws_codebuild as codebuild, Stack, StackProps, aws_ecr as ecr, Token, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { CodebuildResource } from './codebuild.resource';
-import { strict as assert } from 'assert';
+
 export interface CodebuildAssetsSampleConfig {
   serviceToken: string
 }
@@ -69,23 +69,18 @@ export class CodebuildAssetsSampleStack extends Stack {
         owner: `SleepyDeb`,
         repo: `aws-lambda-custom-container`,
         branchOrRef: `main`
-      })    
+      })
     });
-    project.node.addDependency(ecrRepository);
+    ecrRepository.grantPush(project);
 
-    const projectRole = project.role;
-    assert(projectRole, `Project role must be defined`);
-    ecrRepository.grantPush(projectRole);
-
-    // const resource = new CodebuildResource(this, `resource`, {
-    //   serviceToken: props.serviceToken,
-    //   projectName: project.projectName,
-    //   resultJsonPath: "$.exportedEnvironmentVariables[?(@.name=='IMAGE_DIGEST')]"
-    // });
-    // resource.node.addDependency(project);
+    const resource = new CodebuildResource(this, `resource`, {
+      serviceToken: props.serviceToken,
+      projectName: project.projectName,
+      resultJsonPath: "$.exportedEnvironmentVariables[?(@.name=='IMAGE_DIGEST')].value"
+    });
     
     this.ecrRepository = ecrRepository;
-    this.ecrTagOrDigest = `latest`;//resource.result;
+    this.ecrTagOrDigest = resource.result;
   }
 }
 

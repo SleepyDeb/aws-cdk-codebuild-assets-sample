@@ -8,7 +8,7 @@ import * as crypto from 'crypto';
 const sleep = promisify(setTimeout);
 export interface ResourceProperties {
     codebuildProjectName: string;
-    resultJsonPath: string,
+    resultJsonPath?: string,
     initialDelaySeconds?: string
 }
 
@@ -47,7 +47,7 @@ async function loadParameters(resource: CustomResource<ResourceProperties>, log:
     const codebuildProjectName = resource.properties.codebuildProjectName.value;
     assert(codebuildProjectName, `codebuildProjectName property must be defined`);
 
-    const jsonPath = resource.properties.resultJsonPath.value ?? '$.artifacts.location';
+    const jsonPath =  resource.properties.resultJsonPath?.value ?? '$.artifacts.location';
 
     const initialDelaySecondsStr = resource.properties.initialDelaySeconds?.value ?? '60';
     const initialDelaySeconds = Number.parseInt(initialDelaySecondsStr);
@@ -96,10 +96,16 @@ async function getBuildStatus(buildId: string, log: Logger) {
     return build;
 }
 
-function extractJsonPathProperty(build: codebuild.Build, jsonPath: string) {
+function extractJsonPathProperty(build: codebuild.Build, jsonPath: string, log: Logger) {
     const result = jp.query(build, jsonPath)?.[0];
     assert(result, `Codebuild build result didn't return anything for path: ${jsonPath}`);
-    return result as string;
+
+    if(typeof result != "string") {
+        log.warn(`The returned jsonPath expression is not a string, serializing the value using JSON.stringify()`);
+        return JSON.stringify(result);
+    }
+
+    return result;
 }
 
 async function waitCodebuildExecutionCompletion(buildId: string, context: Context, log: Logger, delayBetweenChecksMs = 5000, timeoutRemainingMs = 1000) {
@@ -145,7 +151,7 @@ async function createOrUpdateResource(resource: CustomResource<ResourcePropertie
 
     const build = await waitCodebuildExecutionCompletion(buildId, resource.context, log);
 
-    const result = extractJsonPathProperty(build, jsonPath);
+    const result = extractJsonPathProperty(build, jsonPath, log);
     resource.addResponseValue(`result`, result);
 }
 
