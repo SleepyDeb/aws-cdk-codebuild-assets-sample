@@ -1,4 +1,4 @@
-import { aws_codebuild as codebuild, aws_s3 as s3, Stack, StackProps, aws_ecr as ecr } from 'aws-cdk-lib';
+import { aws_codebuild as codebuild, Stack, StackProps, aws_ecr as ecr } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { CodebuildResource } from './codebuild.resource';
 
@@ -74,7 +74,7 @@ export class CodebuildAssetsSampleStack extends Stack {
       projectName: project.projectName,
       resultJsonPath: '$.exportedEnvironmentVariables.IMAGE_DIGEST'
     });
-    
+
     this.ecrRepositoryArn = ecrRepository.repositoryArn;
     this.ecrImageDigest = resource.result;
   }
