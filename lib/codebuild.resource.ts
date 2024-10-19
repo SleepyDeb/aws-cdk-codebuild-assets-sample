@@ -13,7 +13,7 @@ export class CodebuildResource extends CustomResource {
     constructor(scope: IConstruct, id: string, props: CodebuildResourceProps) {
         super(scope, id, {
             serviceToken: props.serviceToken,
-            resourceType: `Custom::Codebuild::Asset`,
+            resourceType: `Custom::Codebuild-Asset`,
             properties: {
                 codebuildProjectName: props.projectName,
                 resultJsonPath: props.resultJsonPath
