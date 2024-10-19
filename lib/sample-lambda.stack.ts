@@ -9,7 +9,7 @@ export interface SampleLambdaConfig {
 
 export type SampleLambdaProps = SampleLambdaConfig & StackProps;
 
-export class SampleLambda extends Stack {
+export class SampleLambdaStack extends Stack {
     constructor(scope: IConstruct, id: string, props: SampleLambdaProps) {
         super(scope, id, props);
 

@@ -9,7 +9,8 @@ export interface CodebuildAssetsSampleConfig {
 export type CodebuildAssetsSampleProps = CodebuildAssetsSampleConfig & StackProps;
 
 export class CodebuildAssetsSampleStack extends Stack {
-  public readonly ecrImageUri: string;
+  public readonly ecrRepositoryArn: string;
+  public readonly ecrImageDigest: string;
 
   constructor(scope: Construct, id: string, props: CodebuildAssetsSampleProps) {
     super(scope, id, props);
@@ -30,7 +31,9 @@ export class CodebuildAssetsSampleStack extends Stack {
         env: {
           shell: 'bash',
           'exported-variables': [
-            "FULL_IMAGE_URI"
+            "FULL_IMAGE_URI",
+            "IMAGE_DIGEST",
+            "IMAGE_TAG"
           ]
         },
         phases: {
@@ -49,9 +52,11 @@ export class CodebuildAssetsSampleStack extends Stack {
           },
           post_build: {
             commands: [
-              "export FULL_IMAGE_URI=$ECR_REPOSITORY_URI:latest",
+              "export IMAGE_TAG=latest",
+              "export FULL_IMAGE_URI=$ECR_REPOSITORY_URI:$IMAGE_TAG",
+              "export IMAGE_DIGEST=`docker images --no-trunc --quiet local`",
               "docker tag local $FULL_IMAGE_URI",
-              "docker push $FULL_IMAGE_URI"
+              "docker push $FULL_IMAGE_URI",
             ],
             'on-failure': 'ABORT'
           }
@@ -67,9 +72,11 @@ export class CodebuildAssetsSampleStack extends Stack {
     const resource = new CodebuildResource(this, `resource`, {
       serviceToken: props.serviceToken,
       projectName: project.projectName,
-      resultJsonPath: '$.exportedEnvironmentVariables.FULL_IMAGE_URI'
+      resultJsonPath: '$.exportedEnvironmentVariables.IMAGE_DIGEST'
     });
-    this.ecrImageUri = resource.result;
+    
+    this.ecrRepositoryArn = ecrRepository.repositoryArn;
+    this.ecrImageDigest = resource.result;
   }
 }
 
