@@ -20,7 +20,7 @@ export class SampleLambdaStack extends Stack {
             code: lambda.Code.fromEcrImage(repository, {
                 tagOrDigest: props.ecrTagOrDigest
             }),
-            handler: `bootstrap`
+            handler: `/var/task/index.js`
         });
     }
 } 
