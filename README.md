@@ -1,24 +1,28 @@
-# Welcome to your CDK TypeScript project
+## How to Deploy
 
-This is a blank project for CDK development with TypeScript.
+Before you start, make sure you have Docker installed and accessible. On Windows using Rancher Desktop in moby compatibility, you might need administrator privileges to build due to some limitations in the AwsNodejsLambda bundling process.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+1. **Install dependencies:**
+    ```bash
+    npm ci
+    ```
 
-## Useful commands
+2. **Synthesize the CloudFormation template:**
+    ```bash
+    npx cdk synth
+    ```
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+3. **Set the AWS region:**
+    ```bash
+    export AWS_REGION=xx-xxxx-x
+    ```
 
-## How to deploy
-Before you start, ensure that you have docker installed and accessibile, 
-on windows it may be required to be administrator to build due to some akwards
-limitation on AwsNodejsLambda Bundling process s
-> npm ci
-> npx cdk synth
-> export AWS_REGION=xx-xxxx-x
-> export AWS_PROFILE=********
-> npx cdk deploy --all
+4. **Set the AWS profile:**
+    ```bash
+    export AWS_PROFILE=your_profile_name
+    ```
+
+5. **Deploy the stack:**
+    ```bash
+    npx cdk deploy --all
+    ```
