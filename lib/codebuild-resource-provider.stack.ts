@@ -10,6 +10,12 @@ export class CodebuildResourceProviderStack extends Stack {
 
         this.resourceProvider = new lambdajs.NodejsFunction(this, `handler`, {
             timeout: Duration.minutes(6),
+            bundling: {
+                sourceMap: true,
+                externalModules: [
+                    "jsonpath"
+                ]
+            },
             initialPolicy: [
                 new Statement.Codebuild()
                     .toStartBuild()

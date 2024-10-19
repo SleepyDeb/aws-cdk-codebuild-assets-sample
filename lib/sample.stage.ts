@@ -9,12 +9,11 @@ export class SampleStage extends Stage {
         super(scope, id, props);
 
         const { resourceProvider } = new CodebuildResourceProviderStack(this, `codebuild-resource-provider`, {});
-        const { ecrRepositoryArn, ecrImageDigest } = new CodebuildAssetsSampleStack(this, `codebuild-`, {
+        const { ecrRepositoryName, ecrImageDigest } = new CodebuildAssetsSampleStack(this, `codebuild-`, {
             serviceToken: resourceProvider.functionArn
         });
-        
         new SampleLambdaStack(this, `sample-lambda`, {
-            ecrRepositoryArn,
+            ecrRepositoryName,
             ecrTagOrDigest: ecrImageDigest
         })
     }

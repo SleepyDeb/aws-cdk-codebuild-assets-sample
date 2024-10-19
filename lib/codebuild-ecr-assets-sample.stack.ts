@@ -10,6 +10,7 @@ export type CodebuildAssetsSampleProps = CodebuildAssetsSampleConfig & StackProp
 
 export class CodebuildAssetsSampleStack extends Stack {
   public readonly ecrRepositoryArn: string;
+  public readonly ecrRepositoryName: string;
   public readonly ecrImageDigest: string;
 
   constructor(scope: Construct, id: string, props: CodebuildAssetsSampleProps) {
@@ -75,6 +76,7 @@ export class CodebuildAssetsSampleStack extends Stack {
       resultJsonPath: '$.exportedEnvironmentVariables.IMAGE_DIGEST'
     });
 
+    this.ecrRepositoryName = ecrRepository.repositoryName;
     this.ecrRepositoryArn = ecrRepository.repositoryArn;
     this.ecrImageDigest = resource.result;
   }

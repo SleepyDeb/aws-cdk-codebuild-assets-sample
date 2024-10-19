@@ -3,7 +3,7 @@ import { IConstruct } from "constructs";
 import { aws_lambda as lambda, aws_ecr as ecr } from "aws-cdk-lib"; 
 
 export interface SampleLambdaConfig {
-    ecrRepositoryArn: string,
+    ecrRepositoryName: string,
     ecrTagOrDigest: string
 }
 
@@ -13,14 +13,14 @@ export class SampleLambdaStack extends Stack {
     constructor(scope: IConstruct, id: string, props: SampleLambdaProps) {
         super(scope, id, props);
 
-        const repositoryArn = props.ecrRepositoryArn;
-        const repository = ecr.Repository.fromRepositoryArn(this, `repository`, repositoryArn)
-        new lambda.Function(scope, `handler`, {
+        const repositoryName = props.ecrRepositoryName;
+        const repository = ecr.Repository.fromRepositoryName(this, `repository`, repositoryName)
+        new lambda.Function(this, `handler`, {
             runtime: lambda.Runtime.FROM_IMAGE,
             code: lambda.Code.fromEcrImage(repository, {
                 tagOrDigest: props.ecrTagOrDigest
             }),
-            handler: `/var/task/index.js`
+            handler: lambda.Handler.FROM_IMAGE
         });
     }
 } 
