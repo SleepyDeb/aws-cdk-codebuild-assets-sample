@@ -1,7 +1,7 @@
-import { aws_codebuild as codebuild, Stack, StackProps, aws_ecr as ecr } from 'aws-cdk-lib';
+import { aws_codebuild as codebuild, Stack, StackProps, aws_ecr as ecr, Token, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { CodebuildResource } from './codebuild.resource';
-
+import { strict as assert } from 'assert';
 export interface CodebuildAssetsSampleConfig {
   serviceToken: string
 }
@@ -9,14 +9,16 @@ export interface CodebuildAssetsSampleConfig {
 export type CodebuildAssetsSampleProps = CodebuildAssetsSampleConfig & StackProps;
 
 export class CodebuildAssetsSampleStack extends Stack {
-  public readonly ecrRepositoryArn: string;
-  public readonly ecrRepositoryName: string;
-  public readonly ecrImageDigest: string;
+  public readonly ecrRepository: ecr.IRepository;
+  public readonly ecrTagOrDigest: string;
 
   constructor(scope: Construct, id: string, props: CodebuildAssetsSampleProps) {
     super(scope, id, props);
 
-    const ecrRepository = new ecr.Repository(this, `repository`, {})
+    const ecrRepository = this.ecrRepository = new ecr.Repository(this, `repository`, {
+      removalPolicy: RemovalPolicy.DESTROY
+    });
+    
     const project = new codebuild.Project(this, `builder`, {
       environment: {
         buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
@@ -41,7 +43,7 @@ export class CodebuildAssetsSampleStack extends Stack {
           pre_build: {
             commands: [
               "echo Logging in to Amazon ECR...",
-              "aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com"
+              "aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI"
             ],
             'on-failure': 'ABORT'
           },
@@ -61,24 +63,29 @@ export class CodebuildAssetsSampleStack extends Stack {
             ],
             'on-failure': 'ABORT'
           }
-        },
-        source: codebuild.Source.gitHub({
-          owner: `SleepyDeb`,
-          repo: `aws-lambda-custom-container`
-        })
-      })
+        }
+      }),
+      source: codebuild.Source.gitHub({
+        owner: `SleepyDeb`,
+        repo: `aws-lambda-custom-container`,
+        branchOrRef: `main`
+      })    
     });
-    ecrRepository.grantPush(project);
+    project.node.addDependency(ecrRepository);
 
-    const resource = new CodebuildResource(this, `resource`, {
-      serviceToken: props.serviceToken,
-      projectName: project.projectName,
-      resultJsonPath: '$.exportedEnvironmentVariables.IMAGE_DIGEST'
-    });
+    const projectRole = project.role;
+    assert(projectRole, `Project role must be defined`);
+    ecrRepository.grantPush(projectRole);
 
-    this.ecrRepositoryName = ecrRepository.repositoryName;
-    this.ecrRepositoryArn = ecrRepository.repositoryArn;
-    this.ecrImageDigest = resource.result;
+    // const resource = new CodebuildResource(this, `resource`, {
+    //   serviceToken: props.serviceToken,
+    //   projectName: project.projectName,
+    //   resultJsonPath: "$.exportedEnvironmentVariables[?(@.name=='IMAGE_DIGEST')]"
+    // });
+    // resource.node.addDependency(project);
+    
+    this.ecrRepository = ecrRepository;
+    this.ecrTagOrDigest = `latest`;//resource.result;
   }
 }
 

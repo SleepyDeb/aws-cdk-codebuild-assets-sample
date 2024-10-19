@@ -1,20 +1,20 @@
-import { IConstruct } from "constructs";
-import { Stage, StageProps } from "aws-cdk-lib";
+import { App, AppProps } from "aws-cdk-lib";
 import { CodebuildResourceProviderStack } from "./codebuild-resource-provider.stack";
 import { CodebuildAssetsSampleStack } from "./codebuild-ecr-assets-sample.stack";
 import { SampleLambdaStack } from "./sample-lambda.stack";
 
-export class SampleStage extends Stage {
-    constructor(scope: IConstruct, id: string, props?: StageProps) {
-        super(scope, id, props);
+export class SampleApp extends App {
+    constructor(props?: AppProps) {
+        super(props);
 
         const { resourceProvider } = new CodebuildResourceProviderStack(this, `codebuild-resource-provider`, {});
-        const { ecrRepositoryName, ecrImageDigest } = new CodebuildAssetsSampleStack(this, `codebuild-`, {
+        const {  ecrRepository, ecrTagOrDigest } = new CodebuildAssetsSampleStack(this, `codebuild-assets`, {
             serviceToken: resourceProvider.functionArn
         });
+
         new SampleLambdaStack(this, `sample-lambda`, {
-            ecrRepositoryName,
-            ecrTagOrDigest: ecrImageDigest
-        })
+            ecrRepository,
+            ecrTagOrDigest
+        });
     }
 }

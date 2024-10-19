@@ -1,4 +1,4 @@
-import { Duration, Stack, StackProps, aws_lambda_nodejs as lambdajs, aws_lambda as lambda, aws_iam as iam } from "aws-cdk-lib";
+import { Duration, Stack, StackProps, aws_lambda_nodejs as lambdajs, aws_lambda as lambda, aws_iam as iam, BundlingFileAccess } from "aws-cdk-lib";
 import { IConstruct } from "constructs";
 import { Statement } from 'cdk-iam-floyd';
 
@@ -10,16 +10,21 @@ export class CodebuildResourceProviderStack extends Stack {
 
         this.resourceProvider = new lambdajs.NodejsFunction(this, `handler`, {
             timeout: Duration.minutes(6),
+            runtime: lambda.Runtime.NODEJS_20_X,
             bundling: {
-                sourceMap: true,
                 externalModules: [
                     "jsonpath"
-                ]
+                ],
+                nodeModules: [
+                    "jsonpath"
+                ],
+                bundlingFileAccess: BundlingFileAccess.VOLUME_COPY              
             },
             initialPolicy: [
                 new Statement.Codebuild()
                     .toStartBuild()
                     .toBatchGetBuilds()
+                    .toBatchGetProjects()
             ]
         })
     }
