@@ -8,13 +8,14 @@ export class SampleApp extends App {
         super(props);
 
         const { resourceProvider } = new CodebuildResourceProviderStack(this, `codebuild-resource-provider`, {});
-        const {  ecrRepository, ecrTagOrDigest } = new CodebuildAssetsSampleStack(this, `codebuild-assets`, {
+        const {  ecrRepository, ecrDigest } = new CodebuildAssetsSampleStack(this, `codebuild-assets`, {
             serviceToken: resourceProvider.functionArn
         });
 
-        new SampleLambdaStack(this, `sample-lambda`, {
+        new SampleLambdaStack(this, `codebuild-assets-sample-lambda`, {
             ecrRepository,
-            ecrTagOrDigest
+            ecrImageReference: ecrDigest,
+            ecrImageReferenceType: 'DIGEST'
         });
     }
 }

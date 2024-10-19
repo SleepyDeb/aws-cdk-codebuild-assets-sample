@@ -10,13 +10,14 @@ export type CodebuildAssetsSampleProps = CodebuildAssetsSampleConfig & StackProp
 
 export class CodebuildAssetsSampleStack extends Stack {
   public readonly ecrRepository: ecr.IRepository;
-  public readonly ecrTagOrDigest: string;
+  public readonly ecrDigest: string;
 
   constructor(scope: Construct, id: string, props: CodebuildAssetsSampleProps) {
     super(scope, id, props);
 
     const ecrRepository = this.ecrRepository = new ecr.Repository(this, `repository`, {
-      removalPolicy: RemovalPolicy.DESTROY
+      removalPolicy: RemovalPolicy.DESTROY,
+      emptyOnDelete: true
     });
     
     const project = new codebuild.Project(this, `builder`, {
@@ -57,9 +58,10 @@ export class CodebuildAssetsSampleStack extends Stack {
             commands: [
               "export IMAGE_TAG=latest",
               "export FULL_IMAGE_URI=$ECR_REPOSITORY_URI:$IMAGE_TAG",
-              "export IMAGE_DIGEST=`docker images --no-trunc --quiet local`",
               "docker tag local $FULL_IMAGE_URI",
-              "docker push $FULL_IMAGE_URI",
+              `TEMP_FILE=$(mktemp)`,
+              `docker push $FULL_IMAGE_URI | tee "$TEMP_FILE"`,
+              `export IMAGE_DIGEST=$(grep -oP 'digest: \\K[^ ]*' "$TEMP_FILE")`
             ],
             'on-failure': 'ABORT'
           }
@@ -80,7 +82,7 @@ export class CodebuildAssetsSampleStack extends Stack {
     });
     
     this.ecrRepository = ecrRepository;
-    this.ecrTagOrDigest = resource.result;
+    this.ecrDigest = resource.result;
   }
 }
 
