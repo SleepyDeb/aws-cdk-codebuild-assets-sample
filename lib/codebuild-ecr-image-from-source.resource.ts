@@ -7,6 +7,8 @@ export interface CodebuildAssetsSampleConfig {
   imageTagCommand?: string,
   buildTimeImageTag?: string,
   source: codebuild.ISource,
+  serviceToken?: string,
+  ecrRepository?: ecr.IRepository
 }
 
 export type CodebuildAssetsSampleProps = CodebuildAssetsSampleConfig & StackProps;
@@ -19,7 +21,7 @@ export class CodebuildEcrImageFromSource extends Stack {
   constructor(scope: Construct, id: string, props: CodebuildAssetsSampleProps) {
     super(scope, id, props);
 
-    const ecrRepository = this.ecrRepository = new ecr.Repository(this, `repository`, {
+    const ecrRepository = this.ecrRepository = props.ecrRepository ?? new ecr.Repository(this, `repository`, {
       removalPolicy: RemovalPolicy.DESTROY,
       emptyOnDelete: true
     });
@@ -82,6 +84,7 @@ export class CodebuildEcrImageFromSource extends Stack {
 
     const resource = new CodebuildResource(this, `resource`, {
       projectName: project.projectName,
+      serviceToken: props.serviceToken,
       resultJsonPaths: [
         "$.exportedEnvironmentVariables[?(@.name=='IMAGE_DIGEST')].value",
         "$.exportedEnvironmentVariables[?(@.name=='IMAGE_TAG')].value"

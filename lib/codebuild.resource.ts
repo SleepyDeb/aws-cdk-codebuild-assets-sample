@@ -20,8 +20,8 @@ export class CodebuildResource extends CustomResource {
                 resultJsonPaths: props.resultJsonPaths
             }
         });
-        
+
         this.results = Object.keys(props.resultJsonPaths)
-            .map(index => this.getAttString(`result[${index}]`));
+            .map(index => this.getAttString(`results[${index}]`));
     }
 }

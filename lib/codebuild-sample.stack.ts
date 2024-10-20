@@ -3,11 +3,11 @@ import { CodebuildEcrImageFromSource } from "./codebuild-ecr-image-from-source.r
 import { IConstruct } from "constructs";
 import { SampleEcrFunction } from "./sample-ecr-function.resource";
 
-export class SampleStack extends Stack {
+export class CodebuildSampleStack extends Stack {
     constructor(scope: IConstruct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        const { ecrRepository, ecrDigest } = new CodebuildEcrImageFromSource(this, `codebuild-assets`, {
+        const { ecrRepository, ecrDigest } = new CodebuildEcrImageFromSource(this, `assets`, {
             source: codebuild.Source.gitHub({
                 owner: `SleepyDeb`,
                 repo: `aws-lambda-custom-container`,
@@ -15,7 +15,7 @@ export class SampleStack extends Stack {
             })
         });
         
-        new SampleEcrFunction(this, `codebuild-assets-sample-lambda`, {
+        new SampleEcrFunction(this, `lambda`, {
             ecrRepository,
             ecrImageReference: ecrDigest,
             ecrImageReferenceType: 'DIGEST'
