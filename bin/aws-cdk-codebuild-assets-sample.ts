@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import { SampleApp } from '../lib/sample.app';
+import { SampleStack } from '../lib/sample.stack';
+import { App } from 'aws-cdk-lib';
 
-new SampleApp();
+const app = new App();
+new SampleStack(app, `codebuild-assets-sample`, { });

@@ -1,24 +1,27 @@
 import { CustomResource } from "aws-cdk-lib";
 import { IConstruct } from "constructs";
+import { CodebuildResourceProvider } from "./codebuild-resource-provider.resource";
 
 export interface CodebuildResourceProps {
-    serviceToken: string,
+    serviceToken?: string,
     projectName: string,
-    resultJsonPath: string
+    resultJsonPaths: string[]
 }
 
 export class CodebuildResource extends CustomResource {
-    public readonly result: string;
+    public readonly results: string[];
 
     constructor(scope: IConstruct, id: string, props: CodebuildResourceProps) {
         super(scope, id, {
-            serviceToken: props.serviceToken,
+            serviceToken: props.serviceToken ?? CodebuildResourceProvider.getOrCreateServiceToken(scope),
             resourceType: `Custom::Codebuild-Asset`,
             properties: {
                 codebuildProjectName: props.projectName,
-                resultJsonPath: props.resultJsonPath
+                resultJsonPaths: props.resultJsonPaths
             }
         });
-        this.result = this.getAttString('result');
+        
+        this.results = Object.keys(props.resultJsonPaths)
+            .map(index => this.getAttString(`result[${index}]`));
     }
 }

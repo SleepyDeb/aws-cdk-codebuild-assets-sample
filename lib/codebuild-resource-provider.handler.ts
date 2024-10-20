@@ -8,7 +8,7 @@ import * as crypto from 'crypto';
 const sleep = promisify(setTimeout);
 export interface ResourceProperties {
     codebuildProjectName: string;
-    resultJsonPath?: string,
+    resultJsonPaths?: string[],
     initialDelaySeconds?: string
 }
 
@@ -47,16 +47,16 @@ async function loadParameters(resource: CustomResource<ResourceProperties>, log:
     const codebuildProjectName = resource.properties.codebuildProjectName.value;
     assert(codebuildProjectName, `codebuildProjectName property must be defined`);
 
-    const jsonPath =  resource.properties.resultJsonPath?.value ?? '$.artifacts.location';
+    const jsonPaths =  resource.properties.resultJsonPaths?.value ?? [ '$.artifacts.location' ];
 
     const initialDelaySecondsStr = resource.properties.initialDelaySeconds?.value ?? '60';
     const initialDelaySeconds = Number.parseInt(initialDelaySecondsStr);
     assert(!Number.isNaN(initialDelaySeconds) && initialDelaySeconds > -1, `initialDelaySeconds must be a valid positive integer number`);
 
-    log.info(`Loaded parameters, codebuildProjectName: ${codebuildProjectName}, jsonPath: ${jsonPath}, initialDelaySeconds: ${initialDelaySeconds}`)
+    log.info(`Loaded parameters, codebuildProjectName: ${codebuildProjectName}, jsonPath: ${JSON.stringify(jsonPaths)}, initialDelaySeconds: ${initialDelaySeconds}`)
     return {
         codebuildProjectName,
-        jsonPath,
+        jsonPaths,
         initialDelaySeconds
     }
 }
@@ -66,8 +66,8 @@ function sha256(str: string) {
     return hash.update(str).digest('hex')
 }
 
-function generateResourceId(projectName: string, jsonPath: string) {
-    const hashMaterial = `${projectName}:${jsonPath}`;
+function generateResourceId(projectName: string, jsonPaths: string[]) {
+    const hashMaterial = `${projectName}:${JSON.stringify(jsonPaths)}`;
     const hash = sha256(hashMaterial);
     return `${projectName}:${hash}`;
 }
@@ -138,11 +138,11 @@ function canContinueExecution(context: Context, timeoutRemainingMs: number) {
 async function createOrUpdateResource(resource: CustomResource<ResourceProperties>, log: Logger) {
     const {
         codebuildProjectName,
-        jsonPath,
+        jsonPaths,
         initialDelaySeconds
     } = await loadParameters(resource, log);
 
-    const resourceId = generateResourceId(codebuildProjectName, jsonPath);
+    const resourceId = generateResourceId(codebuildProjectName, jsonPaths);
     resource.setPhysicalResourceId(resourceId);
 
     await waitForProjectToBeReady(codebuildProjectName, initialDelaySeconds, log);
@@ -151,8 +151,10 @@ async function createOrUpdateResource(resource: CustomResource<ResourcePropertie
 
     const build = await waitCodebuildExecutionCompletion(buildId, resource.context, log);
 
-    const result = extractJsonPathProperty(build, jsonPath, log);
-    resource.addResponseValue(`result`, result);
+    for(const [index, jsonPath] of Object.entries(jsonPaths)) {
+        const result = extractJsonPathProperty(build, jsonPath, log);
+        resource.addResponseValue(`results[${index}]`, result);
+    }
 }
 
 async function deleteResource(_resource: CustomResource<ResourceProperties>, log: Logger) {
