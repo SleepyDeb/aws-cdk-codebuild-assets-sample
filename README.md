@@ -4,13 +4,25 @@ This project demonstrates a CDK stack that builds Docker images from source code
 
 ## Overview
 
-This stack consists of the following key components:
+This resource consists of the following key components:
 
 1. **ECR Repository**: An Amazon Elastic Container Registry (ECR) repository that stores the Docker images.
 2. **CodeBuild Project**: A CodeBuild project that builds the Docker image from the source code and pushes it to the ECR repository.
 3. **Custom Resources**: Custom resources to trigger the build process and retrieve the image details.
 
 ## Architecture
+
+### CodebuildSampleStack
+
+This stack demonstrates the usage of the CodebuildEcrImageFromSource and SampleEcrFunction classes to build and deploy a Docker image to an AWS Lambda function.
+
+## Usage
+
+### Prerequisites
+
+- AWS Account
+- NodeJS >= 18.0
+- Docker
 
 ### CodebuildEcrImageFromSource
 
@@ -34,18 +46,6 @@ This class sets up the AWS Lambda function used as a custom resource provider fo
 - **functionName**: Optional name for the Lambda function.
 - **role**: Optional IAM role for the Lambda function.
 - **timeout**: Optional timeout duration for the Lambda function.
-
-### CodebuildSampleStack
-
-This stack demonstrates the usage of the CodebuildEcrImageFromSource and SampleEcrFunction classes to build and deploy a Docker image to an AWS Lambda function.
-
-## Usage
-
-### Prerequisites
-
-- AWS Account
-- NodeJS >= 18.0
-- Docker
 
 ### How to Deploy
 
