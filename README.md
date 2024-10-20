@@ -26,7 +26,7 @@ This stack demonstrates the usage of the CodebuildEcrImageFromSource and SampleE
 
 ### CodebuildEcrImageFromSource
 
-This stack sets up the ECR repository and CodeBuild project. It uses custom resources to execute the build process and obtain the image details (digest and tag).
+This class sets up the ECR repository and CodeBuild project. It uses custom resources to execute the build process and obtain the image details (digest and tag).
 
 #### Parameters
 
@@ -66,10 +66,6 @@ Before you start, make sure you have Docker installed and accessible. On Windows
     ```bash
     npx cdk deploy
     ```
-
-## Contributions
-
-Contributions are welcome! Please submit pull requests to the `main` branch.
 
 ## Contact
 

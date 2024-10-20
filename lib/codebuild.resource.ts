@@ -5,7 +5,8 @@ import { CodebuildResourceProvider } from "./codebuild-resource-provider.resourc
 export interface CodebuildResourceProps {
     serviceToken?: string,
     projectName: string,
-    resultJsonPaths: string[]
+    resultJsonPaths: string[],
+    forceRebuild?: boolean
 }
 
 export class CodebuildResource extends CustomResource {
@@ -18,7 +19,7 @@ export class CodebuildResource extends CustomResource {
             properties: {
                 codebuildProjectName: props.projectName,
                 resultJsonPaths: props.resultJsonPaths,
-                description: new Date().toISOString()
+                rebuildProperty: props.forceRebuild ? new Date().toISOString() : ''
             }
         });
 
