@@ -13,13 +13,13 @@ export interface CodebuildAssetsSampleConfig {
 
 export type CodebuildAssetsSampleProps = CodebuildAssetsSampleConfig & StackProps;
 
-export class CodebuildEcrImageFromSource extends Stack {
+export class CodebuildEcrImageFromSource extends Construct {
   public readonly ecrRepository: ecr.IRepository;
   public readonly ecrDigest: string;
   public readonly ecrTag: string;
 
   constructor(scope: Construct, id: string, props: CodebuildAssetsSampleProps) {
-    super(scope, id, props);
+    super(scope, id);
 
     const ecrRepository = this.ecrRepository = props.ecrRepository ?? new ecr.Repository(this, `repository`, {
       removalPolicy: RemovalPolicy.DESTROY,

@@ -17,7 +17,8 @@ export class CodebuildResource extends CustomResource {
             resourceType: `Custom::Codebuild-Asset`,
             properties: {
                 codebuildProjectName: props.projectName,
-                resultJsonPaths: props.resultJsonPaths
+                resultJsonPaths: props.resultJsonPaths,
+                description: new Date().toISOString()
             }
         });
 
