@@ -2,7 +2,7 @@ import { aws_codebuild as codebuild, StackProps, aws_ecr as ecr, RemovalPolicy }
 import { Construct } from 'constructs';
 import { CodebuildResource } from './codebuild.resource';
 
-export interface CodebuildEcrImageFromSourceConfig {
+export interface CodebuildEcrImageFromSourceProps {
   buildCommands?: string[],
   imageTagCommand?: string,
   buildTimeImageTag?: string,
@@ -10,8 +10,6 @@ export interface CodebuildEcrImageFromSourceConfig {
   serviceToken?: string,
   ecrRepository?: ecr.IRepository
 }
-
-export type CodebuildEcrImageFromSourceProps = CodebuildEcrImageFromSourceConfig & StackProps;
 
 export class CodebuildEcrImageFromSource extends Construct {
   public readonly ecrRepository: ecr.IRepository;

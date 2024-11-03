@@ -2,7 +2,7 @@ import { aws_codebuild as codebuild, StackProps, aws_s3 as s3 } from 'aws-cdk-li
 import { Construct } from 'constructs';
 import { CodebuildResource } from './codebuild.resource';
 
-export interface CodebuildAssetsDownloadConfig {
+export interface CodebuildAssetsDownloadProps {
     serviceToken?: string,
     bucket: s3.IBucket,
     path: string,
@@ -12,8 +12,6 @@ export interface CodebuildAssetsDownloadConfig {
         }
     }
 }
-
-export type CodebuildAssetsDownloadProps = CodebuildAssetsDownloadConfig & StackProps;
 
 export class CodebuildAssetsDownload extends Construct {
     public readonly assetsS3Url = {} as {
