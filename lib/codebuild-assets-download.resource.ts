@@ -1,4 +1,4 @@
-import { aws_codebuild as codebuild, StackProps, aws_s3 as s3 } from 'aws-cdk-lib';
+import { aws_codebuild as codebuild, aws_s3 as s3 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { CodebuildResource } from './codebuild.resource';
 
@@ -42,7 +42,7 @@ export class CodebuildAssetsDownload extends Construct {
 
             const urlVariable = `${upperName}_DOWNLOAD_URL`;
             const locationVariable = `${upperName}_S3_LOCATION`;
-            
+
             environmentVariables[urlVariable] = {
                 value: assetValue.url,
                 type: codebuild.BuildEnvironmentVariableType.PLAINTEXT
@@ -69,7 +69,7 @@ export class CodebuildAssetsDownload extends Construct {
                 },
                 phases: {
                     build: {
-                        commands,                    
+                        commands,
                         'on-failure': 'ABORT'
                     }
                 }

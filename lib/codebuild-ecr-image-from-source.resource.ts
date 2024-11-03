@@ -1,4 +1,4 @@
-import { aws_codebuild as codebuild, StackProps, aws_ecr as ecr, RemovalPolicy } from 'aws-cdk-lib';
+import { aws_codebuild as codebuild, aws_ecr as ecr, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { CodebuildResource } from './codebuild.resource';
 
